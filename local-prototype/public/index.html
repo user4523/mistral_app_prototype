@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mistral Chat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+    }
+    main {
+      width: 100%;
+      max-width: 720px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-left: 1px solid #e0e0e0;
+      border-right: 1px solid #e0e0e0;
+    }
+    h1 { font-size: 1.1rem; margin: 0; padding: 0.9rem 1rem; border-bottom: 1px solid #e0e0e0; }
+    #messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .msg { max-width: 80%; padding: 0.5rem 0.75rem; border-radius: 0.75rem; white-space: pre-wrap; }
+    .user { align-self: flex-end; background: #ffe9c7; }
+    .assistant { align-self: flex-start; background: #f0f0f0; }
+    .error { align-self: flex-start; background: #ffd6d6; }
+    form { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid #e0e0e0; }
+    input {
+      flex: 1;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #ff8500;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mistral Chat (mistral-small-latest)</h1>
+    <div id="messages"></div>
+    <form id="form">
+      <input id="input" type="text" placeholder="Nachricht eingeben …" autocomplete="off" required />
+      <button id="send" type="submit">Senden</button>
+    </form>
+  </main>
+  <script>
+    const messagesEl = document.getElementById("messages");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+    const history = [];
+
+    function addMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = role === "user" ? "msg user" : role === "error" ? "msg error" : "msg assistant";
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      send.disabled = true;
+      addMessage("user", text);
+      history.push({ role: "user", content: text });
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Unbekannter Fehler");
+        addMessage("assistant", data.reply);
+        history.push({ role: "assistant", content: data.reply });
+      } catch (err) {
+        addMessage("error", "Fehler: " + err.message);
+      } finally {
+        send.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
