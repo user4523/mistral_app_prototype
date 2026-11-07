@@ -1,50 +1,23 @@
 # mistral_app_prototype
 
-Minimale Web-App: Chat-Schnittstelle im Browser, die die Mistral-API über das offizielle TypeScript-SDK (`@mistralai/mistralai`) aufruft. Der `MISTRAL_API_KEY` bleibt dabei ausschließlich auf dem Server – das Frontend kommuniziert nur mit dem lokalen Endpunkt `/api/chat`.
+Minimale Chat-Web-App mit der Mistral-API: Du schreibst eine Nachricht, die App schickt den
+Gesprächsverlauf an ihr Backend, das Backend ruft über das offizielle SDK das Modell
+**`mistral-small-latest`** auf und zeigt die Antwort im Chat an. Der `MISTRAL_API_KEY` bleibt
+immer serverseitig – das Frontend bekommt ihn nie zu sehen.
 
-## Voraussetzungen
+Zwei Wege, die App zu betreiben:
 
-- Node.js 20 oder neuer
-- Ein Mistral-API-Key von <https://console.mistral.ai>
-
-## Installation
-
-```bash
-npm install
-```
-
-## Konfiguration
-
-```bash
-cp .env.example .env
-```
-
-In `.env` den eigenen Key eintragen:
-
-```
-MISTRAL_API_KEY=dein-key
-```
-
-`.env` ist via `.gitignore` vom Commit ausgeschlossen.
-
-## Lokal ausführen
-
-Entwicklung (mit automatischem Neustart):
-
-```bash
-npm run dev
-```
-
-Oder produktiv (Build + Start):
-
-```bash
-npm run build
-npm start
-```
-
-Die App ist dann unter <http://localhost:3000> erreichbar.
+| Weg | Wo läuft sie | Details |
+| --- | --- | --- |
+| **Lokaler Prototyp** (Node.js + TypeScript-SDK) | `http://localhost:3000` auf deinem Rechner | siehe [local-prototype/README.md](local-prototype/README.md) |
+| **Als App in Mistral Studio** (FastAPI + Python-SDK, TanStack-Start-Frontend) | gehostet auf Mistral Cloud, sichtbar unter **Apps** in console.mistral.ai | siehe [studio-app/README.md](studio-app/README.md) |
 
 ## Aufbau
 
-- `src/server.ts` – Node/TypeScript-Server: liefert `public/index.html` aus und stellt `POST /api/chat` bereit. Ruft `mistral-small-latest` über das offizielle SDK auf; der API-Key wird nur serverseitig aus `process.env` gelesen.
-- `public/index.html` – einfache Chat-Oberfläche (Vanilla JS), sendet den Gesprächsverlauf an `/api/chat`.
+- `local-prototype/` – lauffähiger lokaler Prototyp: Node/TypeScript-Server (`src/server.ts`)
+  mit `POST /api/chat` über das offizielle TypeScript-SDK `@mistralai/mistralai`, Key aus `.env`;
+  Chat-Oberfläche in `public/index.html`.
+- `studio-app/` – Drop-in-Dateien für das Scaffold der Mistral CLI, um die App als **Studio-App**
+  zu deployen (`mistral init --preset app` + `mistral deploy`): FastAPI-Router `api/chat.py`
+  (Python-SDK `mistralai`, Modell `mistral-small-latest`) und Chat-Seite `web/index.tsx`.
+  In Studio liegt der Key im **Secrets-Tab** der App, nicht im Repo.
