@@ -22,6 +22,7 @@ Zwei Wege, die App zu betreiben:
   (Python-SDK `mistralai`, Modell `mistral-small-latest`) und Chat-Seite `web/index.tsx`.
   In Studio liegt der Key im **Secrets-Tab** der App, nicht im Repo.
 - `sekretar/` – konversationaler Sekretär als Agent mit dem [Mistral Agents SDK](https://docs.mistral.ai/studio/agents/getting-started/quickstart)
-  (`agents init`-Projekt, Agent in `main.py`): verwaltet über Studio-Connectoren den Kalender
-  (Google Calendar) und die To-Dos (Notion-Datenbank „To-Do-Liste (Kurz · Mittel · Lang)“).
-  Lokal chat: `uv run --env-file .env agents chat`, Details siehe [sekretar/README.md](sekretar/README.md).
+  (`agents init`-Projekt, Agent in `main.py`): verwaltet über den Studio-Connector **Google Calendar**
+  Termine und To-Dos (To-Dos als ganztägige `To-Do:`-Einträge). Direkt in Mistral/Le Chat anlegbar via
+  `create_agent_api.py` (Agents API). Lokal chat: `uv run --env-file .env agents chat`,
+  Details siehe [sekretar/README.md](sekretar/README.md).
